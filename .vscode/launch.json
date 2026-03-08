@@ -1,8 +1,10 @@
 {
     "version": "0.2.0",
+    // To add a new board: duplicate the configuration below, change the name,
+    // executable path (build/<board>-debug/fw_<board>.elf), device, and SVD file.
     "configurations": [
         {
-            "name": "Debug blinky_board (OpenOCD + Atmel-ICE)",
+            "name": "Debug blinky_board",
             "type": "cortex-debug",
             "request": "launch",
             "servertype": "openocd",
