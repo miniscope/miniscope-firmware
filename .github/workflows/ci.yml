@@ -1,0 +1,70 @@
+name: firmware-ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+
+permissions:
+  contents: write  # needed for creating releases on tag push
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        board: [blinky_board]
+        build_type: [Release]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Arm GNU Toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v2
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Fetch SAMD51 DFP
+        run: bash scripts/fetch_deps.sh
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.board }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.board }} -v
+
+      - name: Collect outputs
+        run: |
+          mkdir -p out/${{ matrix.board }}
+          cp build/${{ matrix.board }}/fw_${{ matrix.board }}.elf out/${{ matrix.board }}/ || true
+          cp build/${{ matrix.board }}/fw_${{ matrix.board }}.hex out/${{ matrix.board }}/ || true
+          cp build/${{ matrix.board }}/fw_${{ matrix.board }}.bin out/${{ matrix.board }}/ || true
+          cp build/${{ matrix.board }}/fw_${{ matrix.board }}.map out/${{ matrix.board }}/ || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ matrix.board }}-${{ matrix.build_type }}
+          path: out/${{ matrix.board }}/
+          retention-days: 30
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            release-assets/**/*

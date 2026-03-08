@@ -1,0 +1,43 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/cmake/arm-gcc-toolchain.cmake",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "blinky_board",
+            "displayName": "Blinky Board (SAMD51P20A)",
+            "inherits": "base"
+        },
+        {
+            "name": "blinky_board-debug",
+            "displayName": "Blinky Board (SAMD51P20A) - Debug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "blinky_board",
+            "configurePreset": "blinky_board"
+        },
+        {
+            "name": "blinky_board-debug",
+            "configurePreset": "blinky_board-debug"
+        }
+    ]
+}

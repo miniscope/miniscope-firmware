@@ -1,0 +1,27 @@
+# Build output
+build/
+
+# Claude Code / planning
+.claude/
+.planning/
+
+# Third-party downloaded content (fetched by scripts/fetch_deps.sh)
+third_party/samd51_dfp/
+
+# IDE / editor
+.vscode/*.log
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Compiled objects (should not appear outside build/)
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+*.map
