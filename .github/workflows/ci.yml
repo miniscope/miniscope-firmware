@@ -10,12 +10,27 @@ permissions:
   contents: write  # needed for creating releases on tag push
 
 jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    outputs:
+      boards: ${{ steps.find.outputs.boards }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Discover board presets
+        id: find
+        run: |
+          boards=$(jq -c '[.configurePresets[] | select(.hidden != true and (.name | endswith("-debug") | not)) | .name]' CMakePresets.json)
+          echo "boards=$boards" >> "$GITHUB_OUTPUT"
+          echo "Discovered boards: $boards"
+
   build:
+    needs: discover
     runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
-        board: [blinky_board]
+        board: ${{ fromJson(needs.discover.outputs.boards) }}
         build_type: [Release]
     steps:
       - uses: actions/checkout@v4
