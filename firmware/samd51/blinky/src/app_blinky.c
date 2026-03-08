@@ -2,11 +2,12 @@
 #include "blinky_config.h"
 #include "hal_gpio.h"
 
+/* Approximate loop iterations per millisecond at 48 MHz DFLL default clock */
+#define DELAY_LOOPS_PER_MS 6000u
+
 static void delay_ms_approx(uint32_t ms)
 {
-    /* Rough busy-wait delay assuming ~48 MHz default clock.
-     * Not accurate - just enough for a visible blink. */
-    for (volatile uint32_t i = 0; i < ms * 6000u; i++) {
+    for (uint32_t i = 0; i < ms * DELAY_LOOPS_PER_MS; i++) {
         __asm__ volatile("nop");
     }
 }
