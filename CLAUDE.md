@@ -36,11 +36,20 @@ Requires: `arm-none-eabi-gcc`, `cmake` (≥3.21), `ninja`
 
 ## Adding a New Board
 
-1. Create `boards/<name>/board_config.cmake` (copy from blinky_board)
-2. Create `boards/<name>/board.h` and `board.c`
-3. Create or copy `boards/<name>/linker.ld`
+Quick start:
+```bash
+bash scripts/new_board.sh <name> [mcu_variant]
+```
+
+Manual steps (or after running the script):
+
+1. Create `boards/<name>/` (copy from `boards/blinky_board/` or use the script)
+2. Edit `boards/<name>/board_config.cmake` — set MCU, firmware project, feature flags
+3. Edit `boards/<name>/board.h` and `board.c` for your hardware
 4. Add `add_board_firmware(<name>)` in root `CMakeLists.txt`
-5. Add preset in `CMakePresets.json`
+5. Add configure + build presets in `CMakePresets.json`
+
+CI auto-discovers boards from non-hidden, non-debug configure presets — no workflow changes needed.
 
 ## Adding a New Firmware Project
 
