@@ -23,7 +23,7 @@ jobs:
           submodules: recursive
 
       - name: Install Arm GNU Toolchain
-        uses: carlosperate/arm-none-eabi-gcc-action@v2
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
           release: '13.3.Rel1'
 
