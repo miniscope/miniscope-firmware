@@ -152,6 +152,28 @@ function(add_board_firmware board_name)
         ${CMAKE_SOURCE_DIR}/boards/board_common
     )
 
+    # Parse BOARD_DEFINITIONS into CMake variables for fw_config.h generation
+    set(BOARD_NAME "${board_name}")
+    if(DEFINED BOARD_DEFINITIONS)
+        foreach(def ${BOARD_DEFINITIONS})
+            if(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)=(.+)$")
+                set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+            elseif(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)$")
+                set(${CMAKE_MATCH_1} 1)
+            endif()
+        endforeach()
+    endif()
+
+    # Generate per-board fw_config.h
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/firmware/common/include/fw_config.h.in
+        ${CMAKE_BINARY_DIR}/generated/${board_name}/fw_config.h
+        @ONLY
+    )
+    target_include_directories(fw_${board_name}.elf PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/${board_name}
+    )
+
     # Compile definitions (device + board ID + feature flags)
     target_compile_definitions(fw_${board_name}.elf PRIVATE
         ${BOARD_DEVICE_DEFINE}
