@@ -41,6 +41,10 @@ set(BOARD_DEFINITIONS
     HAL_CLOCK_PRESET=HAL_CLOCK_PRESET_DFLL_48MHZ
 )
 
+# BOARD_STACK_SIZE - Override default 64 KB stack (DFP linker script default)
+# Example:
+#   set(BOARD_STACK_SIZE 0x2000)  # 8 KB stack
+
 # BOARD_SOURCES - Extra source files relative to the board directory
 # Example:
 #   set(BOARD_SOURCES

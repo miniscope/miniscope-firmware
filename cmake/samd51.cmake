@@ -171,6 +171,13 @@ function(add_board_firmware board_name)
         -Wl,-Map=$<TARGET_FILE_DIR:fw_${board_name}.elf>/fw_${board_name}.map
     )
 
+    # Optional stack size override (DFP linker script default is 64 KB)
+    if(DEFINED BOARD_STACK_SIZE)
+        target_link_options(fw_${board_name}.elf PRIVATE
+            -Wl,--defsym=__stack_size__=${BOARD_STACK_SIZE}
+        )
+    endif()
+
     # Post-build: generate .hex, .bin, print size
     add_custom_command(TARGET fw_${board_name}.elf POST_BUILD
         COMMAND ${CMAKE_OBJCOPY} -O ihex   $<TARGET_FILE:fw_${board_name}.elf> fw_${board_name}.hex
