@@ -9,6 +9,10 @@
  * Calibrated for the default 48 MHz DFLL clock. This is a rough delay
  * suitable for blinking LEDs and non-critical timing. For precision timing,
  * use a hardware timer (TC/TCC peripheral).
+ *
+ * Prefer hal_delay_ms() from hal_systick.h once SysTick is initialized.
+ * This NOP-loop version remains useful for very early startup (before
+ * SysTick is configured) and fault handlers.
  */
 
 #define HAL_DELAY_LOOPS_PER_MS 6000u

@@ -36,6 +36,9 @@ set(BOARD_FIRMWARE_PROJECT "fw_blinky")
 #       BLINKY_LED_PIN=16
 #       BLINKY_LED_PORT=0
 #   )
+set(BOARD_DEFINITIONS
+    F_CPU=48000000UL
+)
 
 # BOARD_SOURCES - Extra source files relative to the board directory
 # Example:
