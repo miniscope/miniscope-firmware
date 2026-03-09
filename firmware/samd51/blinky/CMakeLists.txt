@@ -12,7 +12,7 @@ add_library(fw_blinky INTERFACE)
 # Sources are exposed via a custom property so add_board_firmware() can
 # compile them as part of the executable target.
 set_target_properties(fw_blinky PROPERTIES
-    INTERFACE_FW_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/app_blinky.c"
+    INTERFACE_FW_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.c;${CMAKE_CURRENT_SOURCE_DIR}/src/app_blinky.c"
 )
 
 target_include_directories(fw_blinky INTERFACE

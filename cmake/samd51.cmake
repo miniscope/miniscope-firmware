@@ -108,12 +108,11 @@ function(add_board_firmware board_name)
         message(FATAL_ERROR "System file not found: ${SYSTEM_FILE}")
     endif()
 
-    # Collect board-local sources (main.c and board.c are auto-detected)
+    # Collect board-local sources (board.c is auto-detected; main.c is optional
+    # here because the firmware project may provide it via INTERFACE_FW_SOURCES)
     set(BOARD_EXTRA_SOURCES "")
     if(EXISTS "${BOARD_DIR}/main.c")
         list(APPEND BOARD_EXTRA_SOURCES "${BOARD_DIR}/main.c")
-    else()
-        message(FATAL_ERROR "Missing ${BOARD_DIR}/main.c")
     endif()
     if(EXISTS "${BOARD_DIR}/board.c")
         list(APPEND BOARD_EXTRA_SOURCES "${BOARD_DIR}/board.c")
@@ -153,6 +152,28 @@ function(add_board_firmware board_name)
         ${CMAKE_SOURCE_DIR}/boards/board_common
     )
 
+    # Parse BOARD_DEFINITIONS into CMake variables for fw_config.h generation
+    set(BOARD_NAME "${board_name}")
+    if(DEFINED BOARD_DEFINITIONS)
+        foreach(def ${BOARD_DEFINITIONS})
+            if(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)=(.+)$")
+                set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+            elseif(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)$")
+                set(${CMAKE_MATCH_1} 1)
+            endif()
+        endforeach()
+    endif()
+
+    # Generate per-board fw_config.h
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/firmware/common/include/fw_config.h.in
+        ${CMAKE_BINARY_DIR}/generated/${board_name}/fw_config.h
+        @ONLY
+    )
+    target_include_directories(fw_${board_name}.elf PRIVATE
+        ${CMAKE_BINARY_DIR}/generated/${board_name}
+    )
+
     # Compile definitions (device + board ID + feature flags)
     target_compile_definitions(fw_${board_name}.elf PRIVATE
         ${BOARD_DEVICE_DEFINE}
@@ -171,6 +192,13 @@ function(add_board_firmware board_name)
         -T${BOARD_LINKER_SCRIPT}
         -Wl,-Map=$<TARGET_FILE_DIR:fw_${board_name}.elf>/fw_${board_name}.map
     )
+
+    # Optional stack size override (DFP linker script default is 64 KB)
+    if(DEFINED BOARD_STACK_SIZE)
+        target_link_options(fw_${board_name}.elf PRIVATE
+            -Wl,--defsym=__stack_size__=${BOARD_STACK_SIZE}
+        )
+    endif()
 
     # Post-build: generate .hex, .bin, print size
     add_custom_command(TARGET fw_${board_name}.elf POST_BUILD
