@@ -1,4 +1,5 @@
 #include "board.h"
+#include "fw_config.h"
 #include "blinky_config.h"
 #include "hal_gpio.h"
 #include "hal_clock.h"
