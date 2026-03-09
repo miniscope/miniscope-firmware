@@ -38,6 +38,7 @@ set(BOARD_FIRMWARE_PROJECT "fw_blinky")
 #   )
 set(BOARD_DEFINITIONS
     F_CPU=48000000UL
+    HAL_CLOCK_PRESET=HAL_CLOCK_PRESET_DFLL_48MHZ
 )
 
 # BOARD_SOURCES - Extra source files relative to the board directory
