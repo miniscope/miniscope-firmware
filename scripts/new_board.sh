@@ -32,8 +32,9 @@ if [ -d "$DEST_DIR" ]; then
     exit 1
 fi
 
-# Copy template
+# Copy template (main.c lives in the firmware project, not the board)
 cp -r "$TEMPLATE_DIR" "$DEST_DIR"
+rm -f "$DEST_DIR/main.c"
 
 # Substitute MCU variant if different from the template default
 if [ "$MCU_VARIANT" != "samd51p20a" ]; then
