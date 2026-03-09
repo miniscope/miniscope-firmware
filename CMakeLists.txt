@@ -1,6 +1,15 @@
 cmake_minimum_required(VERSION 3.21)
 project(miniscope-firmware C ASM)
 
+# ---------------------------------------------------------------------------
+# Host-based testing (native compiler, no cross-compilation)
+# ---------------------------------------------------------------------------
+if(BUILD_TESTING AND NOT CMAKE_CROSSCOMPILING)
+    enable_testing()
+    add_subdirectory(tests)
+    return()  # Skip cross-compiled targets when building tests
+endif()
+
 # SAMD51 common build settings and add_board_firmware() function
 include(cmake/samd51.cmake)
 

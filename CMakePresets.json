@@ -18,6 +18,17 @@
             }
         },
         {
+            "name": "host-tests",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/host-tests",
+            "cacheVariables": {
+                "BUILD_TESTING": "ON",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
             "name": "blinky_board",
             "displayName": "Blinky Board (SAMD51P20A)",
             "inherits": "base"
@@ -39,6 +50,19 @@
         {
             "name": "blinky_board-debug",
             "configurePreset": "blinky_board-debug"
+        },
+        {
+            "name": "host-tests",
+            "configurePreset": "host-tests"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "host-tests",
+            "configurePreset": "host-tests",
+            "output": {
+                "outputOnFailure": true
+            }
         }
     ]
 }

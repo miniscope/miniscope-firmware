@@ -5,8 +5,9 @@ build/
 .claude/
 .planning/
 
-# Third-party downloaded content (fetched by scripts/fetch_deps.sh)
+# Third-party downloaded content (fetched by scripts/)
 third_party/samd51_dfp/
+third_party/Unity/
 
 # IDE / editor
 .vscode/*.log
