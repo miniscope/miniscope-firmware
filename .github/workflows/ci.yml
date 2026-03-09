@@ -42,7 +42,7 @@ jobs:
       - name: Discover board presets
         id: find
         run: |
-          boards=$(jq -c '[.configurePresets[] | select(.hidden != true and (.name | endswith("-debug") | not)) | .name]' CMakePresets.json)
+          boards=$(jq -c '[.configurePresets[] | select(.hidden != true and (.name | endswith("-debug") | not) and (.name != "host-tests")) | .name]' CMakePresets.json)
           echo "boards=$boards" >> "$GITHUB_OUTPUT"
           echo "Discovered boards: $boards"
 

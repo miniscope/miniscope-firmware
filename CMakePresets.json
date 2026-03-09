@@ -19,7 +19,7 @@
         },
         {
             "name": "host-tests",
-            "hidden": true,
+            "displayName": "Host Tests (native)",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/host-tests",
             "cacheVariables": {
