@@ -40,6 +40,15 @@
 #define DPLL_MIN_REF_HZ     32000U
 #define DPLL_MAX_REF_HZ     3200000U
 
+/** DPLL LDR (loop divider ratio) is 13-bit, max value 8191. */
+#define DPLL_LDR_MAX         0x1FFFU
+
+/** DPLL LDRFRAC fractional divisor (output = ref * (LDR + 1 + LDRFRAC/32)). */
+#define DPLL_LDRFRAC_DIV     32U
+
+/** GCLK generators 2-11 have 8-bit dividers (max 255). */
+#define GCLK_DIV8_MAX        255U
+
 /** DFLL nominal output frequency. */
 #define DFLL_OUTPUT_HZ       48000000U
 
@@ -214,6 +223,12 @@ void hal_clock_configure_dfll_closed_loop(const hal_dfll_config_t *config)
      * The caller MUST switch GCLK0 to the final clock source.
      */
 
+    /* --- Validate parameters --- */
+    if (config->gclk_gen >= GCLK_GEN_COUNT) {
+        __BKPT(0);  /* GCLK generator index out of range (0-11) */
+        return;
+    }
+
     /* --- Step 1: Temporarily switch GCLK0 away from DFLL ---
      *
      * OSCULP32K is always-on and needs no setup, making it a safe
@@ -349,11 +364,11 @@ void hal_clock_enable_dpll(uint8_t index, const hal_dpll_config_t *config)
     uint32_t ratio     = config->output_hz / config->ref_hz;
     uint32_t ldr       = ratio - 1;
     uint32_t remainder = config->output_hz - (config->ref_hz * ratio);
-    uint32_t ldrfrac   = (remainder * 32U) / config->ref_hz;
+    uint32_t ldrfrac   = (remainder * DPLL_LDRFRAC_DIV) / config->ref_hz;
 
     /* LDR is 13-bit (max 8191). If we exceed this, the configuration
      * is invalid (reference frequency too low for the desired output). */
-    if (ldr > 0x1FFFU) {
+    if (ldr > DPLL_LDR_MAX) {
         __BKPT(0);  /* LDR overflow — ref_hz too low for output_hz */
         return;
     }
@@ -415,7 +430,7 @@ void hal_clock_configure_gclk_gen(const hal_gclk_gen_config_t *config)
      * Generators 2-11 have 8-bit dividers (max 255).
      * A div value of 0 or 1 means undivided (no division).
      */
-    if (config->gen >= 2 && config->div > 255U) {
+    if (config->gen >= 2 && config->div > GCLK_DIV8_MAX) {
         __BKPT(0);  /* 8-bit divider overflow for generators 2-11 */
         return;
     }
