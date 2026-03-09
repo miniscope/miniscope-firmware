@@ -1,8 +1,25 @@
 {
     "version": "0.2.0",
-    // To add a new board: duplicate the configuration below, change the name,
+    // To add a new board: duplicate a configuration below, change the name,
     // executable path (build/<board>-debug/fw_<board>.elf), device, and SVD file.
+    // Note: device and svdFile are SAMD51-specific — update for other MCU families.
     "configurations": [
+        {
+            "name": "Debug (active CMake target)",
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "openocd",
+            "cwd": "${workspaceFolder}",
+            "executable": "${command:cmake.launchTargetPath}",
+            "device": "ATSAMD51P20A",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/atsame5x.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "svdFile": "${workspaceFolder}/third_party/samd51_dfp/samd51a/svd/ATSAMD51P20A.svd",
+            "showDevDebugOutput": "none"
+        },
         {
             "name": "Debug blinky_board",
             "type": "cortex-debug",
