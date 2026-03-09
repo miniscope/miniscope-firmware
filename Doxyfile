@@ -1,0 +1,48 @@
+# Doxyfile for miniscope-firmware
+#
+# Generate with: cmake --build --preset <board> --target docs
+# Or directly:   doxygen Doxyfile
+
+PROJECT_NAME           = "Miniscope Firmware"
+PROJECT_BRIEF          = "Multi-board, multi-MCU firmware framework"
+OUTPUT_DIRECTORY       = build/docs
+
+# Input
+INPUT                  = firmware/ boards/board_common/
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.h *.h.in
+EXCLUDE_PATTERNS       = */build/* */third_party/*
+
+# C-specific
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TYPEDEF_HIDES_STRUCT   = YES
+
+# Extraction
+EXTRACT_ALL            = NO
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+# Documentation style
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+BRIEF_MEMBER_DESC      = YES
+REPEAT_BRIEF           = YES
+ALWAYS_DETAILED_SEC    = NO
+
+# Output format
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_COLORSTYLE        = LIGHT
+
+# Warnings
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+
+# Source browsing
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+
+# Graphs (set to NO if graphviz not available)
+HAVE_DOT               = NO

@@ -38,6 +38,9 @@ add_subdirectory(firmware/common)
 add_subdirectory(firmware/samd51/common)
 add_subdirectory(firmware/samd51/blinky)
 
+# Optional Doxygen documentation target
+include(cmake/docs.cmake)
+
 # ---------------------------------------------------------------------------
 # Board targets
 #
