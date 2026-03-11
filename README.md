@@ -30,7 +30,7 @@ scripts/
   flash_openocd.sh              Flash via OpenOCD + Atmel-ICE
   new_board.sh                  Scaffold a new board directory
 third_party/
-  CMSIS_5/                      ARM CMSIS (git submodule)
+  CMSIS_6/                      ARM CMSIS v6 (git submodule)
   samd51_dfp/                   Microchip SAMD51 Device Family Pack
 ```
 

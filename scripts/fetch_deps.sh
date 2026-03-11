@@ -4,7 +4,7 @@
 # Downloads:
 #   - Microchip SAMD51 DFP (device headers, startup code, linker scripts, SVD)
 #
-# CMSIS_5 is managed as a git submodule and is NOT fetched by this script.
+# CMSIS_6 is managed as a git submodule and is NOT fetched by this script.
 # Run: git submodule update --init
 #
 # Usage:
@@ -76,7 +76,7 @@ else
     echo "  [!!] SAMD51 DFP headers NOT found - check DFP_VERSION or URL"
 fi
 
-if [ -f "${THIRD_PARTY}/CMSIS_5/CMSIS/Core/Include/core_cm4.h" ]; then
+if [ -f "${THIRD_PARTY}/CMSIS_6/CMSIS/Core/Include/core_cm4.h" ]; then
     echo "  [OK] CMSIS Core headers (via submodule)"
 else
     echo "  [!!] CMSIS Core headers NOT found - run: git submodule update --init"

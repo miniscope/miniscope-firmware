@@ -18,7 +18,7 @@
 /** Enable the DWT cycle counter. Must be called before reading CYCCNT. */
 static inline void hal_cycle_count_init(void)
 {
-    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;  /* enable trace */
+    DCB->DEMCR |= DCB_DEMCR_TRCENA_Msk;               /* enable trace */
     DWT->CYCCNT = 0U;
     DWT->CTRL  |= DWT_CTRL_CYCCNTENA_Msk;             /* start counting */
 }

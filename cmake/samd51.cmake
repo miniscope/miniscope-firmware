@@ -9,7 +9,7 @@
 # ---------------------------------------------------------------------------
 # Paths to vendored third-party content
 # ---------------------------------------------------------------------------
-set(CMSIS_CORE_INCLUDE "${CMAKE_SOURCE_DIR}/third_party/CMSIS_5/CMSIS/Core/Include")
+set(CMSIS_CORE_INCLUDE "${CMAKE_SOURCE_DIR}/third_party/CMSIS_6/CMSIS/Core/Include")
 set(DFP_DIR            "${CMAKE_SOURCE_DIR}/third_party/samd51_dfp")
 set(DFP_INCLUDE        "${DFP_DIR}/samd51a/include")
 
