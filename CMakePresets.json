@@ -40,6 +40,19 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
+        },
+        {
+            "name": "grand_central_m4",
+            "displayName": "Grand Central M4 (SAMD51P20A)",
+            "inherits": "base"
+        },
+        {
+            "name": "grand_central_m4-debug",
+            "displayName": "Grand Central M4 (SAMD51P20A) - Debug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ],
     "buildPresets": [
@@ -50,6 +63,14 @@
         {
             "name": "blinky_board-debug",
             "configurePreset": "blinky_board-debug"
+        },
+        {
+            "name": "grand_central_m4",
+            "configurePreset": "grand_central_m4"
+        },
+        {
+            "name": "grand_central_m4-debug",
+            "configurePreset": "grand_central_m4-debug"
         },
         {
             "name": "host-tests",

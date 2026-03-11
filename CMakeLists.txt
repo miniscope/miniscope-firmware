@@ -52,3 +52,4 @@ include(cmake/docs.cmake)
 #   4. Add a CMakePresets.json entry if desired
 # ---------------------------------------------------------------------------
 add_board_firmware(blinky_board)
+add_board_firmware(grand_central_m4)
