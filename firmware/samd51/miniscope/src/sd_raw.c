@@ -32,6 +32,7 @@
 #define CMD7   7   /* SELECT_CARD */
 #define CMD8   8   /* SEND_IF_COND */
 #define CMD12  12  /* STOP_TRANSMISSION */
+#define CMD16  16  /* SET_BLOCKLEN */
 #define CMD17  17  /* READ_SINGLE_BLOCK */
 #define CMD24  24  /* WRITE_BLOCK */
 #define CMD25  25  /* WRITE_MULTIPLE_BLOCK */
@@ -64,6 +65,44 @@ static void sd_clock_init(void)
 
     /* Route GCLK0 to SDHC0 */
     hal_clock_enable_gclk_channel(SDHC0_GCLK_ID, 0);
+}
+
+static void sd_set_clock(uint16_t div)
+{
+    /* SD Host Controller Spec 3.2.1: clock change procedure */
+
+    /* Disable SD clock output */
+    SDHC0_REGS->SDHC_CCR &= ~SDHC_CCR_SDCLKEN_Msk;
+
+    /* Wait for command and data lines to be free */
+    uint32_t timeout = SD_CMD_TIMEOUT;
+    while ((SDHC0_REGS->SDHC_PSR & (SDHC_PSR_CMDINHC_Msk | SDHC_PSR_CMDINHD_Msk)) && --timeout) {
+        /* wait */
+    }
+
+    /* Write new divider: SDCLKFSEL (bits 15:8) + USDCLKFSEL (bits 7:6) */
+    uint16_t ccr = SDHC_CCR_INTCLKEN_Msk
+                 | SDHC_CCR_SDCLKFSEL(div & 0xFF)
+                 | SDHC_CCR_USDCLKFSEL((div >> 8) & 0x3);
+    SDHC0_REGS->SDHC_CCR = ccr;
+
+    /* Wait for internal clock stable */
+    timeout = SD_CMD_TIMEOUT;
+    while (!(SDHC0_REGS->SDHC_CCR & SDHC_CCR_INTCLKS_Msk) && --timeout) {
+        /* wait */
+    }
+
+    /* Re-enable SD clock output */
+    SDHC0_REGS->SDHC_CCR |= SDHC_CCR_SDCLKEN_Msk;
+}
+
+static void sd_reset_lines(uint8_t mask)
+{
+    SDHC0_REGS->SDHC_SRR = mask;
+    uint32_t timeout = SD_CMD_TIMEOUT;
+    while ((SDHC0_REGS->SDHC_SRR & mask) && --timeout) {
+        /* wait for reset complete */
+    }
 }
 
 static bool sd_send_cmd(uint8_t cmd, uint32_t arg, uint8_t resp_type)
@@ -102,9 +141,15 @@ static bool sd_send_cmd(uint8_t cmd, uint32_t arg, uint8_t resp_type)
     /* Wait for command complete */
     timeout = SD_CMD_TIMEOUT;
     while (!(SDHC0_REGS->SDHC_NISTR & SDHC_NISTR_CMDC_Msk) && --timeout) {
-        if (SDHC0_REGS->SDHC_EISTR) return false;
+        if (SDHC0_REGS->SDHC_EISTR) {
+            sd_reset_lines(SDHC_SRR_SWRSTCMD_Msk);
+            return false;
+        }
     }
-    if (!timeout) return false;
+    if (!timeout) {
+        sd_reset_lines(SDHC_SRR_SWRSTCMD_Msk);
+        return false;
+    }
 
     SDHC0_REGS->SDHC_NISTR = SDHC_NISTR_CMDC_Msk;
     return true;
@@ -128,6 +173,9 @@ sd_error_t sd_raw_init(void)
         /* wait */
     }
     if (!timeout) return SD_ERR_TIMEOUT;
+
+    /* Set data timeout: ~2M SDCLK cycles (matches reference) */
+    SDHC0_REGS->SDHC_TCR = SDHC_TCR_DTCVAL(0xE);
 
     /* Enable internal clock */
     SDHC0_REGS->SDHC_CCR = SDHC_CCR_INTCLKEN_Msk | SDHC_CCR_SDCLKFSEL(0x80);
@@ -184,6 +232,12 @@ sd_error_t sd_raw_init(void)
     /* Set host controller to 4-bit mode */
     SDHC0_REGS->SDHC_HC1R |= SDHC_HC1R_DW_4BIT;
 
+    /* Ramp clock: 234 kHz init → 30 MHz operational (60 MHz / (2*1)) */
+    sd_set_clock(1);
+
+    /* CMD16: SET_BLOCKLEN to 512 bytes */
+    sd_send_cmd(CMD16, SD_BLOCK_SIZE, 1);
+
     return SD_OK;
 }
 
@@ -213,14 +267,20 @@ sd_error_t sd_raw_write_block(uint32_t block_addr, const uint8_t *data)
         while (!(SDHC0_REGS->SDHC_PSR & SDHC_PSR_BUFWREN_Msk) && --timeout) {
             /* wait for buffer write ready */
         }
-        if (!timeout) return SD_ERR_TIMEOUT;
+        if (!timeout) {
+            sd_reset_lines(SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_TIMEOUT;
+        }
         SDHC0_REGS->SDHC_BDPR = src[i];
     }
 
     /* Wait for transfer complete */
     timeout = SD_CMD_TIMEOUT;
     while (!(SDHC0_REGS->SDHC_NISTR & SDHC_NISTR_TRFC_Msk) && --timeout) {
-        if (SDHC0_REGS->SDHC_EISTR) return SD_ERR_CMD_FAIL;
+        if (SDHC0_REGS->SDHC_EISTR) {
+            sd_reset_lines(SDHC_SRR_SWRSTCMD_Msk | SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_CMD_FAIL;
+        }
     }
     if (!timeout) return SD_ERR_TIMEOUT;
 
@@ -260,14 +320,20 @@ sd_error_t sd_raw_write_multi(uint32_t block_addr,
         while (!(SDHC0_REGS->SDHC_PSR & SDHC_PSR_BUFWREN_Msk) && --timeout) {
             /* wait for buffer write ready */
         }
-        if (!timeout) return SD_ERR_TIMEOUT;
+        if (!timeout) {
+            sd_reset_lines(SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_TIMEOUT;
+        }
         SDHC0_REGS->SDHC_BDPR = src[i];
     }
 
     /* Wait for transfer complete */
     timeout = SD_CMD_TIMEOUT;
     while (!(SDHC0_REGS->SDHC_NISTR & SDHC_NISTR_TRFC_Msk) && --timeout) {
-        if (SDHC0_REGS->SDHC_EISTR) return SD_ERR_CMD_FAIL;
+        if (SDHC0_REGS->SDHC_EISTR) {
+            sd_reset_lines(SDHC_SRR_SWRSTCMD_Msk | SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_CMD_FAIL;
+        }
     }
     if (!timeout) return SD_ERR_TIMEOUT;
 
@@ -301,14 +367,20 @@ sd_error_t sd_raw_read_block(uint32_t block_addr, uint8_t *data)
         while (!(SDHC0_REGS->SDHC_PSR & SDHC_PSR_BUFRDEN_Msk) && --timeout) {
             /* wait for buffer ready */
         }
-        if (!timeout) return SD_ERR_TIMEOUT;
+        if (!timeout) {
+            sd_reset_lines(SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_TIMEOUT;
+        }
         dst[i] = SDHC0_REGS->SDHC_BDPR;
     }
 
     /* Wait for transfer complete */
     timeout = SD_CMD_TIMEOUT;
     while (!(SDHC0_REGS->SDHC_NISTR & SDHC_NISTR_TRFC_Msk) && --timeout) {
-        if (SDHC0_REGS->SDHC_EISTR) return SD_ERR_CMD_FAIL;
+        if (SDHC0_REGS->SDHC_EISTR) {
+            sd_reset_lines(SDHC_SRR_SWRSTCMD_Msk | SDHC_SRR_SWRSTDAT_Msk);
+            return SD_ERR_CMD_FAIL;
+        }
     }
     if (!timeout) return SD_ERR_TIMEOUT;
 
