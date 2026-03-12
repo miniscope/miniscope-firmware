@@ -63,8 +63,10 @@ static void sd_clock_init(void)
     /* Enable MCLK for SDHC0 (AHB bus) */
     MCLK_REGS->MCLK_AHBMASK |= MCLK_AHBMASK_SDHC0_Msk;
 
-    /* Route GCLK0 to SDHC0 */
+    /* Route GCLK0 to SDHC0 main and slow clocks.
+     * The slow clock drives the data timeout counter (SDHC_TCR). */
     hal_clock_enable_gclk_channel(SDHC0_GCLK_ID, 0);
+    hal_clock_enable_gclk_channel(SDHC0_GCLK_ID_SLOW, 0);
 }
 
 static void sd_set_clock(uint16_t div)
