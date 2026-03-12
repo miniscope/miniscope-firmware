@@ -740,6 +740,87 @@ static void preset_dpll_120mhz_xosc32k(void)
     s_gclk_freq[0] = 120000000U;
 }
 
+/**
+ * Preset: HAL_CLOCK_PRESET_DPLL_60MHZ_XOSC32K
+ *
+ * 60 MHz CPU via DPLL0 with XOSC32K crystal reference.
+ * Identical to the 120 MHz XOSC32K preset except GCLK0 divides
+ * DPLL0 output by 2 to produce 60 MHz CPU clock.
+ *
+ * Clock chain:
+ *   XOSC32K (32.768 kHz) → GCLK2 → DFLL closed-loop (48 MHz)
+ *     → GCLK3 ÷16 (3 MHz) → DPLL0 ×40 (120 MHz) → GCLK0 ÷2 (60 MHz)
+ *
+ * This matches the original Wire-Free V4 firmware's clock tree
+ * (DPLL0=120 MHz, GCLK0 div=2 → 60 MHz CPU).
+ */
+static void preset_dpll_60mhz_xosc32k(void)
+{
+    verify_autows();
+
+    /* Steps 1-6: identical to 120 MHz XOSC32K preset */
+
+    /* Step 1: Enable XOSC32K */
+    hal_xosc32k_config_t xosc_cfg = {
+        .startup  = 2,
+        .en32k    = true,
+        .en1k     = false,
+        .ondemand = false,
+        .cgm      = 1,
+    };
+    hal_clock_enable_xosc32k(&xosc_cfg);
+
+    /* Step 2: GCLK2 = XOSC32K ÷1 = 32.768 kHz */
+    hal_gclk_gen_config_t gclk2_cfg = {
+        .gen = 2,
+        .src = HAL_CLK_SRC_XOSC32K,
+        .div = 1,
+        .idc = false,
+    };
+    hal_clock_configure_gclk_gen(&gclk2_cfg);
+    s_gclk_freq[2] = 32768U;
+
+    /* Step 3: DFLL closed-loop locked to GCLK2 */
+    hal_dfll_config_t dfll_cfg = {
+        .mul      = 1465,
+        .cstep    = 0x1f,
+        .fstep    = 0x7f,
+        .gclk_gen = 2,
+    };
+    hal_clock_configure_dfll_closed_loop(&dfll_cfg);
+
+    /* Step 4: GCLK3 = DFLL ÷16 = 3 MHz */
+    hal_gclk_gen_config_t gclk3_cfg = {
+        .gen = 3,
+        .src = HAL_CLK_SRC_DFLL,
+        .div = 16,
+        .idc = false,
+    };
+    hal_clock_configure_gclk_gen(&gclk3_cfg);
+    s_gclk_freq[3] = DFLL_OUTPUT_HZ / 16U;
+
+    /* Step 5: Route GCLK3 to DPLL0 */
+    hal_clock_enable_gclk_channel(OSCCTRL_GCLK_ID_FDPLL0, 3);
+
+    /* Step 6: DPLL0 = 3 MHz × 40 = 120 MHz */
+    hal_dpll_config_t dpll0_cfg = {
+        .ref_clk   = HAL_DPLL_REF_GCLK,
+        .ref_hz    = 3000000U,
+        .output_hz = 120000000U,
+    };
+    hal_clock_enable_dpll(0, &dpll0_cfg);
+
+    /* Step 7: GCLK0 = DPLL0 ÷2 = 60 MHz (the only difference) */
+    hal_gclk_gen_config_t gclk0_cfg = {
+        .gen = 0,
+        .src = HAL_CLK_SRC_DPLL0,
+        .div = 2,
+        .idc = true,
+    };
+    hal_clock_configure_gclk_gen(&gclk0_cfg);
+    s_gclk_freq[0] = 60000000U;
+}
+
 /* ======================================================================
  * Preset Dispatcher
  * ====================================================================== */
@@ -757,6 +838,10 @@ void hal_clock_init_preset(hal_clock_preset_t preset)
 
     case HAL_CLOCK_PRESET_DPLL_120MHZ_XOSC32K:
         preset_dpll_120mhz_xosc32k();
+        break;
+
+    case HAL_CLOCK_PRESET_DPLL_60MHZ_XOSC32K:
+        preset_dpll_60mhz_xosc32k();
         break;
 
     default:

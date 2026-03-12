@@ -53,6 +53,19 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
             }
+        },
+        {
+            "name": "wirefree_v4",
+            "displayName": "Wire-Free V4 (SAMD51J20A)",
+            "inherits": "base"
+        },
+        {
+            "name": "wirefree_v4-debug",
+            "displayName": "Wire-Free V4 (SAMD51J20A) - Debug",
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
         }
     ],
     "buildPresets": [
@@ -71,6 +84,14 @@
         {
             "name": "grand_central_m4-debug",
             "configurePreset": "grand_central_m4-debug"
+        },
+        {
+            "name": "wirefree_v4",
+            "configurePreset": "wirefree_v4"
+        },
+        {
+            "name": "wirefree_v4-debug",
+            "configurePreset": "wirefree_v4-debug"
         },
         {
             "name": "host-tests",
