@@ -65,24 +65,10 @@ static const uint8_t enc_3b4b[8][2] = {
     { 0x0E, 0x01 }, /* D.x.7 (primary) */
 };
 
-/* Count ones in 6-bit value */
-static int count_ones_6(uint8_t val)
+/* Count ones in lower N bits — uses compiler builtin (single-cycle on Cortex-M4) */
+static int count_ones(uint8_t val)
 {
-    int count = 0;
-    for (int i = 0; i < 6; i++) {
-        if (val & (1 << i)) count++;
-    }
-    return count;
-}
-
-/* Count ones in 4-bit value */
-static int count_ones_4(uint8_t val)
-{
-    int count = 0;
-    for (int i = 0; i < 4; i++) {
-        if (val & (1 << i)) count++;
-    }
-    return count;
+    return __builtin_popcount(val);
 }
 
 void encode_8b10b_init(encode_8b10b_state_t *state)
@@ -99,7 +85,7 @@ uint16_t encode_8b10b_byte(encode_8b10b_state_t *state, uint8_t byte)
 
     /* 5b/6b encode */
     uint8_t code_6b = enc_5b6b[edcba][rd_idx];
-    int ones_6 = count_ones_6(code_6b);
+    int ones_6 = count_ones(code_6b);
     int disparity_6 = ones_6 - (6 - ones_6); /* +/- disparity */
 
     /* Update running disparity after 6b code */
@@ -111,7 +97,7 @@ uint16_t encode_8b10b_byte(encode_8b10b_state_t *state, uint8_t byte)
     /* 3b/4b encode with updated disparity */
     int rd_idx_4 = (rd_after_6 > 0) ? 1 : 0;
     uint8_t code_4b = enc_3b4b[hgf][rd_idx_4];
-    int ones_4 = count_ones_4(code_4b);
+    int ones_4 = count_ones(code_4b);
     int disparity_4 = ones_4 - (4 - ones_4);
 
     /* Update final running disparity */

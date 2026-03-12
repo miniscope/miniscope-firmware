@@ -6,6 +6,7 @@
 #include "board.h"
 #include "hal_gpio.h"
 #include "hal_clock.h"
+#include "hal_delay.h"
 #include "sam.h"
 
 /*
@@ -163,7 +164,7 @@ sd_error_t sd_raw_init(void)
         }
         if (i == 999) return SD_ERR_TIMEOUT;
         /* Brief delay between retries */
-        for (volatile int d = 0; d < 10000; d++) { __asm volatile("nop"); }
+        delay_ms_approx(1);
     }
 
     /* CMD2: ALL_SEND_CID */

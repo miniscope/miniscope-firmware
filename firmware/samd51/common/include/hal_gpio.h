@@ -22,6 +22,17 @@ static inline void gpio_set_output(uint8_t port, uint8_t pin)
 }
 
 /**
+ * Set a pin as input with input buffer enabled.
+ * @param port  Port index (0=A, 1=B, 2=C, 3=D).
+ * @param pin   Pin number within port (0-31).
+ */
+static inline void gpio_set_input(uint8_t port, uint8_t pin)
+{
+    PORT_REGS->GROUP[port].PORT_DIRCLR = (1u << pin);
+    PORT_REGS->GROUP[port].PORT_PINCFG[pin] |= PORT_PINCFG_INEN_Msk;
+}
+
+/**
  * Drive a pin high.
  * @param port  Port index (0=A, 1=B, 2=C, 3=D).
  * @param pin   Pin number within port (0-31).

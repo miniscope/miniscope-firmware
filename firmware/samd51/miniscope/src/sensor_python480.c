@@ -66,10 +66,7 @@ static void spi_init_pins(void)
     gpio_set_output(BOARD_SENSOR_NSS_PORT, BOARD_SENSOR_NSS_PIN);
 
     /* MISO is input — enable input buffer */
-    PORT_REGS->GROUP[BOARD_SENSOR_MISO_PORT].PORT_DIRCLR =
-        (1u << BOARD_SENSOR_MISO_PIN);
-    PORT_REGS->GROUP[BOARD_SENSOR_MISO_PORT].PORT_PINCFG[BOARD_SENSOR_MISO_PIN] |=
-        PORT_PINCFG_INEN_Msk;
+    gpio_set_input(BOARD_SENSOR_MISO_PORT, BOARD_SENSOR_MISO_PIN);
 
     spi_clk_low();
     spi_nss_deassert();

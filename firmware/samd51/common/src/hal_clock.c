@@ -512,6 +512,13 @@ uint32_t hal_clock_get_gclk_freq(uint8_t gen)
 
 /* ======================================================================
  * Preset Implementations
+ *
+ * IMPORTANT: Each preset is intentionally self-contained, even if presets
+ * share similar setup steps.  Clock init ordering is safety-critical and
+ * presets may diverge independently over time (different oscillator
+ * parameters, different DPLL configs, etc.).  Do NOT refactor common
+ * steps into a shared helper — keep each preset fully readable in
+ * isolation.
  * ====================================================================== */
 
 /**
