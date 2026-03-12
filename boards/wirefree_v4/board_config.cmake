@@ -12,7 +12,7 @@ set(BOARD_MCU "samd51j20a")
 set(BOARD_DEVICE_DEFINE "__SAMD51J20A__")
 
 # Linker script — use DFP-provided flash script
-set(BOARD_LINKER_SCRIPT "${DFP_DIR}/samd51a/gcc/gcc/samd51j20a_flash.ld")
+set(BOARD_LINKER_SCRIPT "${CMAKE_CURRENT_LIST_DIR}/samd51j20a_flash.ld")
 
 # Firmware project
 set(BOARD_FIRMWARE_PROJECT "fw_miniscope")

@@ -48,6 +48,7 @@ static dmac_descriptor_registers_t s_ll_desc[MINISCOPE_NUM_BUFFERS]
 
 static buffer_pool_t *s_pool;
 static bool s_active;
+static volatile bool s_start_pending;
 
 /* Recording state counters (shared between ISRs and main loop) */
 static volatile uint32_t s_buffer_count;
@@ -148,7 +149,9 @@ static void pcc_dma_init(void)
     DMAC_REGS->CHANNEL[PCC_DMA_CHANNEL].DMAC_CHINTENSET =
         DMAC_CHINTENSET_TCMPL_Msk;
 
-    /* Enable DMAC channel 0 IRQ in NVIC */
+    /* Enable DMAC channel 0 IRQ in NVIC (clear pending first for warm restart) */
+    NVIC_DisableIRQ(DMAC_0_IRQn);
+    NVIC_ClearPendingIRQ(DMAC_0_IRQn);
     NVIC_EnableIRQ(DMAC_0_IRQn);
 }
 
@@ -156,6 +159,7 @@ void pcc_capture_init(buffer_pool_t *pool)
 {
     s_pool = pool;
     s_active = false;
+    s_start_pending = false;
     s_buffer_count = 0;
     s_frame_num = 0;
     s_frame_buffer_count = 0;
@@ -169,7 +173,7 @@ void pcc_capture_init(buffer_pool_t *pool)
 
 void pcc_capture_start(void)
 {
-    if (s_active) return;
+    if (s_active || s_start_pending) return;
 
     buffer_pool_reset(s_pool);
     s_buffer_count = 0;
@@ -177,21 +181,20 @@ void pcc_capture_start(void)
     s_frame_buffer_count = 0;
     s_dropped_count = 0;
     s_record_start_ms = hal_systick_get_ticks();
-    s_active = true;
 
     /* Reset DMA descriptor chain to start at buffer 0 */
     s_base_desc[PCC_DMA_CHANNEL] = s_ll_desc[0];
 
-    /* Enable PCC */
-    PCC_REGS->PCC_MR |= PCC_MR_PCEN_Msk;
-
-    /* Enable DMA channel */
-    DMAC_REGS->CHANNEL[PCC_DMA_CHANNEL].DMAC_CHCTRLA |=
-        DMAC_CHCTRLA_ENABLE_Msk;
+    /* Wait for next frame boundary before enabling DMA+PCC.
+     * pcc_frame_valid_callback() will detect s_start_pending and
+     * enable the hardware at the falling edge of frame-valid. */
+    s_start_pending = true;
 }
 
 void pcc_capture_stop(void)
 {
+    s_start_pending = false;
+
     if (!s_active) return;
 
     /* Disable DMA channel */
@@ -246,6 +249,17 @@ uint8_t *pcc_capture_get_buffer(uint8_t idx)
 void pcc_frame_valid_callback(uint8_t extint)
 {
     (void)extint;
+
+    /* Frame-aligned start: enable DMA+PCC on first frame boundary */
+    if (s_start_pending) {
+        s_start_pending = false;
+        s_active = true;
+        s_base_desc[PCC_DMA_CHANNEL] = s_ll_desc[0];
+        DMAC_REGS->CHANNEL[PCC_DMA_CHANNEL].DMAC_CHCTRLA |=
+            DMAC_CHCTRLA_ENABLE_Msk;
+        PCC_REGS->PCC_MR |= PCC_MR_PCEN_Msk;
+        return;
+    }
 
     if (!s_active) return;
 

@@ -43,6 +43,10 @@ static inline void dmac_init(
     dmac_descriptor_registers_t *base_descriptors,
     dmac_descriptor_registers_t *writeback_descriptors)
 {
+    /* Disable DMAC and clear CRC source before reset (safe for warm restart) */
+    DMAC_REGS->DMAC_CTRL &= ~DMAC_CTRL_DMAENABLE_Msk;
+    DMAC_REGS->DMAC_CRCCTRL &= ~DMAC_CRCCTRL_CRCSRC_Msk;
+
     /* Software reset */
     DMAC_REGS->DMAC_CTRL = DMAC_CTRL_SWRST_Msk;
     while (DMAC_REGS->DMAC_CTRL & DMAC_CTRL_SWRST_Msk) {
