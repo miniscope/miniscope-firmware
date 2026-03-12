@@ -127,4 +127,16 @@ static inline void dmac_link_descriptors(
     descs[count - 1u].DMAC_DESCADDR = circular ? (uint32_t)&descs[0] : 0u;
 }
 
+/**
+ * Read the write-back descriptor's remaining beat count for a channel.
+ * During an active transfer, the write-back descriptor is updated by
+ * hardware with the remaining number of beats. After the channel is
+ * disabled, this gives the count at the point of suspension.
+ */
+static inline uint16_t dmac_get_writeback_btcnt(
+    const dmac_descriptor_registers_t *wb, uint8_t ch)
+{
+    return wb[ch].DMAC_BTCNT;
+}
+
 #endif /* HAL_DMAC_H */

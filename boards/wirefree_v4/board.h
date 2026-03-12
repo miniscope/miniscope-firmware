@@ -79,6 +79,20 @@
 #define BOARD_BUTTON_PIN        25  /* PA25 — EXTINT[9] (odd) */
 #define BOARD_BUTTON_EXTINT     9
 
+/* --- Sensor reset --- */
+#define BOARD_SENSOR_RESET_PORT 1   /* Port B */
+#define BOARD_SENSOR_RESET_PIN  13  /* PB13 */
+
+/* --- SD card detect --- */
+#define BOARD_SD_CD_PORT        1   /* Port B */
+#define BOARD_SD_CD_PIN         5   /* PB05 */
+
+/* --- UART (debug) --- */
+#define BOARD_UART_TX_PORT      1   /* Port B */
+#define BOARD_UART_TX_PIN       16  /* PB16 */
+#define BOARD_UART_RX_PORT      1   /* Port B */
+#define BOARD_UART_RX_PIN       17  /* PB17 */
+
 /* --- Sensor clock output (GCLK1 on PB15) --- */
 #define BOARD_SCLK_PORT         1   /* Port B */
 #define BOARD_SCLK_PIN          15  /* PB15 — GCLK_IO[1], PMUX M */

@@ -31,6 +31,7 @@
 #define CMD6   6   /* SWITCH_FUNC */
 #define CMD7   7   /* SELECT_CARD */
 #define CMD8   8   /* SEND_IF_COND */
+#define CMD12  12  /* STOP_TRANSMISSION */
 #define CMD17  17  /* READ_SINGLE_BLOCK */
 #define CMD24  24  /* WRITE_BLOCK */
 #define CMD25  25  /* WRITE_MULTIPLE_BLOCK */
@@ -231,12 +232,46 @@ sd_error_t sd_raw_write_multi(uint32_t block_addr,
                               const uint8_t *data,
                               uint32_t block_count)
 {
-    /* Simple implementation: write blocks one at a time */
-    for (uint32_t i = 0; i < block_count; i++) {
-        sd_error_t err = sd_raw_write_block(block_addr + i,
-                                            data + i * SD_BLOCK_SIZE);
-        if (err != SD_OK) return err;
+    if (block_count == 0) return SD_OK;
+    if (block_count == 1) return sd_raw_write_block(block_addr, data);
+
+    /* Wait for data inhibit to clear */
+    uint32_t timeout = SD_CMD_TIMEOUT;
+    while ((SDHC0_REGS->SDHC_PSR & SDHC_PSR_CMDINHD_Msk) && --timeout) {
+        /* wait */
     }
+    if (!timeout) return SD_ERR_TIMEOUT;
+
+    /* Set block size and count */
+    SDHC0_REGS->SDHC_BSR = SDHC_BSR_BLOCKSIZE(SD_BLOCK_SIZE);
+    SDHC0_REGS->SDHC_BCR = (uint16_t)block_count;
+
+    /* Transfer mode: multi-block write with block count enable */
+    SDHC0_REGS->SDHC_TMR = SDHC_TMR_MSBSEL_Msk | SDHC_TMR_BCEN_Msk;
+
+    /* CMD25: WRITE_MULTIPLE_BLOCK */
+    if (!sd_send_cmd(CMD25, block_addr, 1)) return SD_ERR_CMD_FAIL;
+
+    /* Write all blocks via buffer data port */
+    const uint32_t *src = (const uint32_t *)data;
+    uint32_t total_words = (block_count * SD_BLOCK_SIZE) / 4;
+    for (uint32_t i = 0; i < total_words; i++) {
+        timeout = SD_CMD_TIMEOUT;
+        while (!(SDHC0_REGS->SDHC_PSR & SDHC_PSR_BUFWREN_Msk) && --timeout) {
+            /* wait for buffer write ready */
+        }
+        if (!timeout) return SD_ERR_TIMEOUT;
+        SDHC0_REGS->SDHC_BDPR = src[i];
+    }
+
+    /* Wait for transfer complete */
+    timeout = SD_CMD_TIMEOUT;
+    while (!(SDHC0_REGS->SDHC_NISTR & SDHC_NISTR_TRFC_Msk) && --timeout) {
+        if (SDHC0_REGS->SDHC_EISTR) return SD_ERR_CMD_FAIL;
+    }
+    if (!timeout) return SD_ERR_TIMEOUT;
+
+    SDHC0_REGS->SDHC_NISTR = SDHC_NISTR_TRFC_Msk;
     return SD_OK;
 }
 

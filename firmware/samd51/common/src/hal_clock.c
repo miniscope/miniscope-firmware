@@ -449,6 +449,9 @@ void hal_clock_configure_gclk_gen(const hal_gclk_gen_config_t *config)
     if (config->idc) {
         genctrl |= GCLK_GENCTRL_IDC_Msk;
     }
+    if (config->oe) {
+        genctrl |= GCLK_GENCTRL_OE_Msk;
+    }
 
     /* Write the complete GENCTRL register. The GCLK peripheral requires
      * the full register to be written in a single operation (no RMW). */

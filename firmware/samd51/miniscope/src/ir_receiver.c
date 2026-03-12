@@ -45,7 +45,7 @@ void ir_receiver_init(void)
     /* Configure EXTINT line for IR */
     hal_eic_config_t eic_cfg = {
         .extint   = BOARD_IR_EXTINT,
-        .sense    = HAL_EIC_SENSE_FALL,  /* Falling edge = IR pulse start */
+        .sense    = HAL_EIC_SENSE_BOTH,  /* Both edges for NEC pulse timing */
         .filter   = true,
         .debounce = true,
     };

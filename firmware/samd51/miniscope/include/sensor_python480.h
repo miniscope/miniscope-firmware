@@ -32,6 +32,9 @@ void sensor_python480_set_fps(uint8_t fps);
 /** Set exposure time in microseconds. */
 void sensor_python480_set_exposure(uint32_t exposure_us);
 
+/** Enable 2x2 subsampling (matching reference Enable_Subsample). */
+void sensor_python480_enable_subsample(void);
+
 /** Write a single register via bit-bang SPI. */
 void sensor_python480_write_reg(uint16_t addr, uint16_t value);
 

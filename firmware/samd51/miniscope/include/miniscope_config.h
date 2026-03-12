@@ -22,9 +22,12 @@
 #define MINISCOPE_META_WORDS        12
 #endif
 
-/* Battery voltage threshold (ADC counts) below which recording stops */
+/* Battery voltage threshold (ADC counts) below which recording stops.
+ * 12-bit ADC with VDDANA/2 reference, 1/5 voltage divider:
+ *   ADC = (V_batt / 5) / (VDDANA / 2) * 4095
+ *   For 3.4V cutoff: (3.4/5) / 1.65 * 4095 ≈ 1688 */
 #ifndef MINISCOPE_BATT_LOW_THRESHOLD
-#define MINISCOPE_BATT_LOW_THRESHOLD 512
+#define MINISCOPE_BATT_LOW_THRESHOLD 1688
 #endif
 
 /* Default LED PWM duty cycle (0-100) */
@@ -50,6 +53,19 @@
 /* SD card data start block */
 #ifndef MINISCOPE_SD_DATA_START
 #define MINISCOPE_SD_DATA_START     1024
+#endif
+
+/* Image dimensions */
+#ifndef MINISCOPE_WIDTH
+#define MINISCOPE_WIDTH             608
+#endif
+
+#ifndef MINISCOPE_HEIGHT
+#define MINISCOPE_HEIGHT            608
+#endif
+
+#ifndef MINISCOPE_BINNING
+#define MINISCOPE_BINNING           2
 #endif
 
 #endif /* MINISCOPE_CONFIG_H */

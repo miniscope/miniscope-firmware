@@ -92,6 +92,7 @@ typedef struct {
     hal_clk_src_t   src;        /* Clock source for this generator */
     uint16_t        div;        /* Division factor (0 or 1 = undivided) */
     bool            idc;        /* Improve duty cycle (useful for odd dividers) */
+    bool            oe;         /* Output enable (route clock to GCLK_IO pin) */
 } hal_gclk_gen_config_t;
 
 /**

@@ -7,7 +7,7 @@
 
 void board_init(void)
 {
-    /* Initialize the clock tree — 120 MHz CPU via DPLL0, XOSC32K reference */
+    /* Initialize the clock tree — 60 MHz CPU via DPLL0, XOSC32K reference */
     hal_clock_init_preset(HAL_CLOCK_PRESET);
 
     /* Initialize system timing */
@@ -31,6 +31,7 @@ void board_init(void)
         .src = HAL_CLK_SRC_DPLL0,
         .div = 6,
         .idc = true,
+        .oe  = true,
     };
     hal_clock_configure_gclk_gen(&gclk1_cfg);
 

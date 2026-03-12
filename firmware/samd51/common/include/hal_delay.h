@@ -24,4 +24,13 @@ static inline void delay_ms_approx(uint32_t ms)
     }
 }
 
+#define HAL_DELAY_LOOPS_PER_US 6u
+
+static inline void delay_us_approx(uint32_t us)
+{
+    for (uint32_t i = 0; i < us * HAL_DELAY_LOOPS_PER_US; i++) {
+        __asm__ volatile("nop");
+    }
+}
+
 #endif /* HAL_DELAY_H */
