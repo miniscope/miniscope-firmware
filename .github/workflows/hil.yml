@@ -61,4 +61,4 @@ jobs:
             python3 -c "import sys,json; checks={c['name']:c['passed'] for c in json.load(sys.stdin)['checks']}; sys.exit(0 if checks.get('probe:grand_central_m4') else 1)"
 
       - name: Flash and verify
-        run: benchctl flash --firmware fw_grand_central_m4.elf --target grand_central_m4 --verify
+        run: benchctl flash --firmware "${{ github.workspace }}/fw_grand_central_m4.elf" --target grand_central_m4 --verify
