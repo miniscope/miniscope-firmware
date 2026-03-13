@@ -5,6 +5,7 @@
 #include "hal_clock.h"
 #include "hal_systick.h"
 #include "hal_cycle_count.h"
+#include "hal_usb_cdc.h"
 
 void board_init(void)
 {
@@ -19,4 +20,7 @@ void board_init(void)
     /* Configure LED pin as output (PB1 on Grand Central M4) */
     gpio_set_output(BLINKY_LED_PORT, BLINKY_LED_PIN);
     gpio_clear(BLINKY_LED_PORT, BLINKY_LED_PIN);
+
+    /* Initialize USB CDC (no-op if FW_ENABLE_USB not defined) */
+    hal_usb_cdc_init();
 }

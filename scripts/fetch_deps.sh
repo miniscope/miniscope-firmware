@@ -82,5 +82,11 @@ else
     echo "  [!!] CMSIS Core headers NOT found - run: git submodule update --init"
 fi
 
+if [ -f "${THIRD_PARTY}/tinyusb/src/tusb.h" ]; then
+    echo "  [OK] TinyUSB (via submodule)"
+else
+    echo "  [!!] TinyUSB NOT found - run: git submodule update --init"
+fi
+
 echo ""
 echo "Done."

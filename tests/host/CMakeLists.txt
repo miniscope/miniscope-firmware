@@ -43,6 +43,7 @@ target_include_directories(test_app_blinky PRIVATE
     ${CMAKE_SOURCE_DIR}/firmware/common/include
     ${CMAKE_BINARY_DIR}/generated
 )
+target_compile_definitions(test_app_blinky PRIVATE FW_ENABLE_USB)
 target_link_libraries(test_app_blinky PRIVATE unity mock_hal)
 add_test(NAME test_app_blinky COMMAND test_app_blinky)
 

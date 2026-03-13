@@ -62,3 +62,16 @@ jobs:
 
       - name: Flash and verify
         run: benchctl flash --firmware "${{ github.workspace }}/fw_grand_central_m4.elf" --target grand_central_m4 --verify
+
+      - name: Wait for USB CDC enumeration
+        run: |
+          sleep 3
+          # Verify the CDC serial device appeared
+          benchctl health --json | \
+            python3 -c "import sys,json; checks={c['name']:c['passed'] for c in json.load(sys.stdin)['checks']}; ok=checks.get('serial:grand_central_m4',False); print(f'serial device: {\"found\" if ok else \"NOT FOUND\"}'); sys.exit(0 if ok else 1)"
+
+      - name: Verify firmware boot message
+        run: benchctl serial expect --target grand_central_m4 --pattern "BOOT.*miniscope-fw" --timeout 10
+
+      - name: Verify firmware heartbeat
+        run: benchctl serial expect --target grand_central_m4 --pattern "BLINK.*count=" --timeout 5

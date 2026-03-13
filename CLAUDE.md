@@ -73,6 +73,10 @@ bash scripts/flash_openocd.sh build/blinky_board/fw_blinky_board.elf
 
 GitHub Actions matrix builds all boards on push/PR. Tag pushes (`v*`) create releases.
 
+## USB CDC
+
+TinyUSB (git submodule at `third_party/tinyusb`, tag 0.17.0) provides the USB device stack. Boards opt in via `FW_ENABLE_USB` in `BOARD_DEFINITIONS`. The `cmake/tinyusb.cmake` INTERFACE library is conditionally linked by `add_board_firmware()`. A DFP v3 compatibility shim (`tusb_dfp_v3_compat.h`) bridges the register naming gap between our DFP v3.8.x and TinyUSB's v2-style access patterns. Use `--recurse-submodules` on clone or `git submodule update --init` to fetch TinyUSB.
+
 ## Conventions
 
 - Board-specific code in `boards/<name>/`, never in firmware project dirs

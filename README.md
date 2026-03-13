@@ -32,6 +32,7 @@ scripts/
 third_party/
   CMSIS_6/                      ARM CMSIS v6 (git submodule)
   samd51_dfp/                   Microchip SAMD51 Device Family Pack
+  tinyusb/                      TinyUSB stack (git submodule)
 ```
 
 Dependency chain: `fw_platform_common` &rarr; `samd51_common` &rarr; `fw_<project>` &rarr; `fw_<board>.elf`
@@ -111,6 +112,12 @@ GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on 
 - **Creates GitHub Releases** with firmware binaries on `v*` tag pushes
 
 No workflow changes are needed when adding a new board &mdash; just add a preset.
+
+## USB CDC
+
+Boards can opt into USB CDC serial output by adding `FW_ENABLE_USB` to their `BOARD_DEFINITIONS` in `board_config.cmake`. This links [TinyUSB](https://github.com/hathach/tinyusb) (provided as a git submodule) and enables the `hal_usb_cdc` HAL layer. When `FW_ENABLE_USB` is not defined, all USB CDC functions are inline no-ops with zero code cost.
+
+The blinky firmware uses USB CDC to emit `[BOOT]` and `[BLINK]` messages when a host is connected, enabling hardware-in-the-loop CI verification via `benchctl serial expect`.
 
 ## Documentation
 

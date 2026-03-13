@@ -24,6 +24,9 @@ target_sources(samd51_common INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_eic.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_i2c_bitbang.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_sercom_uart.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_usb_cdc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/usb_descriptors.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/usb_irq_handlers.c
 )
 
 target_compile_options(samd51_common INTERFACE ${COMMON_C_FLAGS})

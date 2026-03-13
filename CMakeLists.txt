@@ -13,6 +13,11 @@ endif()
 # SAMD51 common build settings and add_board_firmware() function
 include(cmake/samd51.cmake)
 
+# TinyUSB stack (optional — only if submodule is present)
+if(EXISTS "${CMAKE_SOURCE_DIR}/third_party/tinyusb/src/tusb.h")
+    include(cmake/tinyusb.cmake)
+endif()
+
 # ---------------------------------------------------------------------------
 # Firmware libraries (layered)
 #
