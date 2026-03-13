@@ -1,0 +1,61 @@
+name: hil
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hil-bench-01
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Arm GNU Toolchain
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          release: '13.3.Rel1'
+
+      - name: Install build tools
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Fetch SAMD51 DFP
+        run: bash scripts/fetch_deps.sh
+
+      - name: Configure
+        run: cmake --preset grand_central_m4
+
+      - name: Build
+        run: cmake --build --preset grand_central_m4
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: hil-firmware-grand_central_m4
+          path: build/grand_central_m4/fw_grand_central_m4.elf
+          retention-days: 7
+
+  flash-test:
+    needs: build
+    runs-on: [self-hosted, hil-bench-01]
+    timeout-minutes: 10
+    steps:
+      - name: Download firmware
+        uses: actions/download-artifact@v4
+        with:
+          name: hil-firmware-grand_central_m4
+
+      - name: Health check
+        run: benchctl health
+
+      - name: Flash and verify
+        run: benchctl flash --firmware fw_grand_central_m4.elf --target grand_central_m4 --verify
