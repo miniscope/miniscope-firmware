@@ -92,6 +92,7 @@ typedef struct {
     hal_clk_src_t   src;        /* Clock source for this generator */
     uint16_t        div;        /* Division factor (0 or 1 = undivided) */
     bool            idc;        /* Improve duty cycle (useful for odd dividers) */
+    bool            oe;         /* Output enable (route clock to GCLK_IO pin) */
 } hal_gclk_gen_config_t;
 
 /**
@@ -155,6 +156,17 @@ typedef enum {
      *     -> GCLK3 /16 (3 MHz) -> DPLL0 x40 (120 MHz) -> GCLK0
      */
     HAL_CLOCK_PRESET_DPLL_120MHZ_XOSC32K,
+
+    /**
+     * 60 MHz CPU via DPLL0 with XOSC32K, same chain as 120 MHz but
+     * GCLK0 divides DPLL0 by 2.
+     *   XOSC32K -> GCLK2 -> DFLL closed-loop (48 MHz)
+     *     -> GCLK3 /16 (3 MHz) -> DPLL0 x40 (120 MHz) -> GCLK0 /2 (60 MHz)
+     *
+     * Used for reduced power consumption or compatibility with the
+     * original Wire-Free V4 firmware's 60 MHz CPU clock.
+     */
+    HAL_CLOCK_PRESET_DPLL_60MHZ_XOSC32K,
 } hal_clock_preset_t;
 
 /* ======================================================================

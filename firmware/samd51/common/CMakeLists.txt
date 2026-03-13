@@ -19,6 +19,11 @@ target_include_directories(samd51_common INTERFACE
 target_sources(samd51_common INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_systick.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_clock.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_tc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_adc.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_eic.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_i2c_bitbang.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hal_sercom_uart.c
 )
 
 target_compile_options(samd51_common INTERFACE ${COMMON_C_FLAGS})

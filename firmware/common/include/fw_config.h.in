@@ -13,16 +13,66 @@
 #define FW_BOARD_MCU    "@BOARD_MCU@"
 
 /* CPU frequency */
+#ifndef F_CPU
 #cmakedefine F_CPU @F_CPU@
+#endif
 
 /* Clock preset */
+#ifndef HAL_CLOCK_PRESET
 #cmakedefine HAL_CLOCK_PRESET @HAL_CLOCK_PRESET@
+#endif
 
 /* Feature flags — defined only when enabled in board_config.cmake */
+#ifndef FW_ENABLE_UART
 #cmakedefine FW_ENABLE_UART
+#endif
+#ifndef FW_ENABLE_SPI
 #cmakedefine FW_ENABLE_SPI
+#endif
+#ifndef FW_ENABLE_I2C
 #cmakedefine FW_ENABLE_I2C
+#endif
+#ifndef FW_ENABLE_USB
 #cmakedefine FW_ENABLE_USB
+#endif
+#ifndef FW_ENABLE_DMA
 #cmakedefine FW_ENABLE_DMA
+#endif
+
+/* Sensor selection (mutually exclusive) */
+#ifndef FW_SENSOR_PYTHON480
+#cmakedefine FW_SENSOR_PYTHON480
+#endif
+#ifndef FW_SENSOR_NANEYE
+#cmakedefine FW_SENSOR_NANEYE
+#endif
+
+/* Output mode selection */
+#ifndef FW_OUTPUT_SD
+#cmakedefine FW_OUTPUT_SD
+#endif
+#ifndef FW_OUTPUT_SPI
+#cmakedefine FW_OUTPUT_SPI
+#endif
+
+/* Miniscope feature flags */
+#ifndef FW_ENABLE_8B10B
+#cmakedefine FW_ENABLE_8B10B
+#endif
+#ifndef FW_ENABLE_LED_PWM
+#cmakedefine FW_ENABLE_LED_PWM
+#endif
+#ifndef FW_ENABLE_EWL
+#cmakedefine FW_ENABLE_EWL
+#endif
+#ifndef FW_ENABLE_BATTERY_MONITOR
+#cmakedefine FW_ENABLE_BATTERY_MONITOR
+#endif
+#ifndef FW_ENABLE_IR_RECEIVER
+#cmakedefine FW_ENABLE_IR_RECEIVER
+#endif
+#ifndef FW_ENABLE_HIL_TEST
+#cmakedefine FW_ENABLE_HIL_TEST
+#endif
 
 #endif /* FW_CONFIG_H */

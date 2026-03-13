@@ -43,6 +43,10 @@ static inline void dmac_init(
     dmac_descriptor_registers_t *base_descriptors,
     dmac_descriptor_registers_t *writeback_descriptors)
 {
+    /* Disable DMAC and clear CRC source before reset (safe for warm restart) */
+    DMAC_REGS->DMAC_CTRL &= ~DMAC_CTRL_DMAENABLE_Msk;
+    DMAC_REGS->DMAC_CRCCTRL &= ~DMAC_CRCCTRL_CRCSRC_Msk;
+
     /* Software reset */
     DMAC_REGS->DMAC_CTRL = DMAC_CTRL_SWRST_Msk;
     while (DMAC_REGS->DMAC_CTRL & DMAC_CTRL_SWRST_Msk) {
@@ -125,6 +129,18 @@ static inline void dmac_link_descriptors(
         descs[i].DMAC_DESCADDR = (uint32_t)&descs[i + 1u];
     }
     descs[count - 1u].DMAC_DESCADDR = circular ? (uint32_t)&descs[0] : 0u;
+}
+
+/**
+ * Read the write-back descriptor's remaining beat count for a channel.
+ * During an active transfer, the write-back descriptor is updated by
+ * hardware with the remaining number of beats. After the channel is
+ * disabled, this gives the count at the point of suspension.
+ */
+static inline uint16_t dmac_get_writeback_btcnt(
+    const dmac_descriptor_registers_t *wb, uint8_t ch)
+{
+    return wb[ch].DMAC_BTCNT;
 }
 
 #endif /* HAL_DMAC_H */

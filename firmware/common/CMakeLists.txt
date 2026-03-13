@@ -32,4 +32,5 @@ configure_file(
 # Version source compiled in every board executable via INTERFACE
 target_sources(fw_platform_common INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/fw_version.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/encode_8b10b.c
 )

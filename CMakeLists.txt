@@ -37,6 +37,7 @@ include(cmake/samd51.cmake)
 add_subdirectory(firmware/common)
 add_subdirectory(firmware/samd51/common)
 add_subdirectory(firmware/samd51/blinky)
+add_subdirectory(firmware/samd51/miniscope)
 
 # Optional Doxygen documentation target
 include(cmake/docs.cmake)
@@ -53,3 +54,4 @@ include(cmake/docs.cmake)
 # ---------------------------------------------------------------------------
 add_board_firmware(blinky_board)
 add_board_firmware(grand_central_m4)
+add_board_firmware(wirefree_v4)
