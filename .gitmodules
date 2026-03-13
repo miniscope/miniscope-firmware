@@ -3,3 +3,7 @@
 	url = https://github.com/ARM-software/CMSIS_6.git
 	branch = main
 	shallow = true
+[submodule "third_party/tinyusb"]
+	path = third_party/tinyusb
+	url = https://github.com/hathach/tinyusb.git
+	shallow = true

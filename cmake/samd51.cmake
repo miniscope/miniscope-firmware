@@ -127,6 +127,19 @@ function(add_board_firmware board_name)
         endforeach()
     endif()
 
+    # Parse BOARD_DEFINITIONS into CMake variables early — needed for
+    # fw_config.h generation and conditional TinyUSB linking.
+    set(BOARD_NAME "${board_name}")
+    if(DEFINED BOARD_DEFINITIONS)
+        foreach(def ${BOARD_DEFINITIONS})
+            if(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)=(.+)$")
+                set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
+            elseif(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)$")
+                set(${CMAKE_MATCH_1} 1)
+            endif()
+        endforeach()
+    endif()
+
     # Get firmware project sources from the INTERFACE target's custom property
     get_target_property(FW_PROJECT_SOURCES ${BOARD_FIRMWARE_PROJECT} INTERFACE_FW_SOURCES)
     if(NOT FW_PROJECT_SOURCES)
@@ -142,6 +155,13 @@ function(add_board_firmware board_name)
         ${BOARD_EXTRA_SOURCES}
     )
 
+    # Link TinyUSB BEFORE the firmware project so that the DFP v3 compat
+    # wrapper sam.h (in cmake/tinyusb_compat/) appears on the include path
+    # before the real DFP sam.h (from samd51_common).
+    if(FW_ENABLE_USB AND TARGET tinyusb)
+        target_link_libraries(fw_${board_name}.elf PRIVATE tinyusb)
+    endif()
+
     # Link against the firmware project INTERFACE library (for include paths
     # and transitive dependencies like samd51_common and fw_platform_common)
     target_link_libraries(fw_${board_name}.elf PRIVATE ${BOARD_FIRMWARE_PROJECT})
@@ -151,18 +171,6 @@ function(add_board_firmware board_name)
         ${BOARD_DIR}
         ${CMAKE_SOURCE_DIR}/boards/board_common
     )
-
-    # Parse BOARD_DEFINITIONS into CMake variables for fw_config.h generation
-    set(BOARD_NAME "${board_name}")
-    if(DEFINED BOARD_DEFINITIONS)
-        foreach(def ${BOARD_DEFINITIONS})
-            if(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)=(.+)$")
-                set(${CMAKE_MATCH_1} "${CMAKE_MATCH_2}")
-            elseif(def MATCHES "^([A-Za-z_][A-Za-z0-9_]*)$")
-                set(${CMAKE_MATCH_1} 1)
-            endif()
-        endforeach()
-    endif()
 
     # Generate per-board fw_config.h
     configure_file(
